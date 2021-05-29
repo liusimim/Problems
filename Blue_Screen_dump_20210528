@@ -1,0 +1,154 @@
+I was using my computer to run an overnight imaging with a self-written software on LabVIEW. However, just 8 min after the imaging was launched the computer crashed. 
+The imaging data were supposed to be automatically saved to the local drive D by the software. 
+The same problem happened before when I tried to write data onto an external HDD. Not every time though - just sometimes, but is still annoying.
+I analyzed the dump file using WinDbg Preview and here is the info. I am not a CS student so I don't quite understand. I would appreciate any suggestions!!!!!
+
+
+DRIVER_IRQL_NOT_LESS_OR_EQUAL (d1)
+An attempt was made to access a pageable (or completely invalid) address at an
+interrupt request level (IRQL) that is too high.  This is usually
+caused by drivers using improper addresses.
+If kernel debugger is available get stack backtrace.
+Arguments:
+Arg1: 0000000000000000, memory referenced
+Arg2: 0000000000000002, IRQL
+Arg3: 0000000000000000, value 0 = read operation, 1 = write operation
+Arg4: fffff880012ab2a5, address which referenced memory
+
+Debugging Details:
+------------------
+
+GetUlongPtrFromAddress: unable to read from fffff800034f0300
+
+KEY_VALUES_STRING: 1
+
+    Key  : Analysis.CPU.mSec
+    Value: 4796
+
+    Key  : Analysis.DebugAnalysisManager
+    Value: Create
+
+    Key  : Analysis.Elapsed.mSec
+    Value: 12177
+
+    Key  : Analysis.Init.CPU.mSec
+    Value: 2296
+
+    Key  : Analysis.Init.Elapsed.mSec
+    Value: 37739
+
+    Key  : Analysis.Memory.CommitPeak.Mb
+    Value: 67
+
+    Key  : WER.OS.Branch
+    Value: win7sp1_ldr
+
+    Key  : WER.OS.Timestamp
+    Value: 2019-06-12T06:00:00Z
+
+    Key  : WER.OS.Version
+    Value: 7.1.7601.24499
+
+
+BUGCHECK_CODE:  d1
+
+BUGCHECK_P1: 0
+
+BUGCHECK_P2: 2
+
+BUGCHECK_P3: 0
+
+BUGCHECK_P4: fffff880012ab2a5
+
+READ_ADDRESS: Unable to get MmSystemRangeStart
+GetUlongPtrFromAddress: unable to read from fffff800034f02f0
+GetUlongPtrFromAddress: unable to read from fffff800034f04a8
+ 0000000000000000 
+
+CUSTOMER_CRASH_COUNT:  1
+
+PROCESS_NAME:  System
+
+TRAP_FRAME:  fffff80007d10900 -- (.trap 0xfffff80007d10900)
+NOTE: The trap frame does not contain all registers.
+Some register values may be zeroed or incorrect.
+rax=0000000000000000 rbx=0000000000000000 rcx=0000000000000000
+rdx=0000000000000004 rsi=0000000000000000 rdi=0000000000000000
+rip=fffff880012ab2a5 rsp=fffff80007d10a90 rbp=fffffa8031d14230
+ r8=fffffa8031d14230  r9=0000000000000000 r10=fffff80003437180
+r11=0000000000000000 r12=0000000000000000 r13=0000000000000000
+r14=0000000000000000 r15=0000000000000000
+iopl=0         nv up ei pl zr na po nc
+iaStorA+0x692a5:
+fffff880`012ab2a5 ??              ???
+Resetting default scope
+
+DPC_STACK_BASE:  FFFFF80007D16FB0
+
+STACK_OVERFLOW: Stack Limit: fffff80007d10fb0. Use (kF) and (!stackusage) to investigate stack usage.
+
+STACK_TEXT:  
+fffff800`07d107b8 fffff800`032f50e9     : 00000000`0000000a 00000000`00000000 00000000`00000002 00000000`00000000 : nt!KeBugCheckEx
+fffff800`07d107c0 fffff800`032f2ece     : 00000000`00000000 00000000`00000000 00000000`00000800 00000000`00000000 : nt!KiBugCheckDispatch+0x69
+fffff800`07d10900 fffff880`012ab2a5     : fffff800`0323a360 00002bb6`00000000 fffff800`032e7c1c 00000000`00000011 : nt!KiPageFault+0x44e
+fffff800`07d10a90 fffff800`0323a360     : 00002bb6`00000000 fffff800`032e7c1c 00000000`00000011 00000000`00000000 : iaStorA+0x692a5
+fffff800`07d10a98 00002bb6`00000000     : fffff800`032e7c1c 00000000`00000011 00000000`00000000 00000000`00000008 : hal!HalpKInterruptHeap+0x360
+fffff800`07d10aa0 fffff800`032e7c1c     : 00000000`00000011 00000000`00000000 00000000`00000008 fffffa80`31d14230 : 0x00002bb6`00000000
+fffff800`07d10aa8 00000000`00000000     : 00000000`00000000 00000000`00000000 00000000`00000000 00000000`00000000 : nt!KiInterruptDispatchNoLock+0xdc
+
+
+SYMBOL_NAME:  iaStorA+692a5
+
+MODULE_NAME: iaStorA
+
+IMAGE_NAME:  iaStorA.sys
+
+STACK_COMMAND:  .thread ; .cxr ; kb
+
+FAILURE_BUCKET_ID:  0xD1_iaStorA+692a5
+
+OS_VERSION:  7.1.7601.24499
+
+BUILDLAB_STR:  win7sp1_ldr
+
+OSPLATFORM_TYPE:  x64
+
+OSNAME:  Windows 7
+
+FAILURE_ID_HASH:  {d8650b82-6921-9cd3-cde9-764da1af9a39}
+
+Followup:     MachineOwner
+---------
+
+0: kd> kF
+ #   Memory  Child-SP          RetAddr               Call Site
+00           fffff800`07d107b8 fffff800`032f50e9     nt!KeBugCheckEx
+01         8 fffff800`07d107c0 fffff800`032f2ece     nt!KiBugCheckDispatch+0x69
+02       140 fffff800`07d10900 fffff880`012ab2a5     nt!KiPageFault+0x44e
+03       190 fffff800`07d10a90 fffff800`0323a360     iaStorA+0x692a5
+04         8 fffff800`07d10a98 00002bb6`00000000     hal!HalpKInterruptHeap+0x360
+05         8 fffff800`07d10aa0 fffff800`032e7c1c     0x00002bb6`00000000
+06         8 fffff800`07d10aa8 00000000`00000000     nt!KiInterruptDispatchNoLock+0xdc
+0: kd> !stackusage
+Stack Usage By Function
+=================================================================================
+
+      Size     Count  Module
+0x00000190         1  nt!KiPageFault
+0x00000140         1  nt!KiBugCheckDispatch
+0x00000008         1  hal!HalpKInterruptHeap
+0x00000008         2  nt!KeBugCheckEx
+0x00000008         1  iaStorA
+
+Total Size: 0x000002E8
+
+
+Stack Usage By Module
+=================================================================================
+
+      Size     Count  Module
+0x000002D8         4  nt
+0x00000008         1  hal
+0x00000008         1  iaStorA
+
+Total Size: 0x000002E8
